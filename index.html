@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>EARNZEXBOT • Secure UPI Payment</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --green: #16ad70;
+      --green-dark: #07945b;
+      --green-deep: #087d50;
+      --text: #123f30;
+      --muted: #66857a;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+      color: var(--text);
+
+      background:
+        radial-gradient(
+          circle at 15% 10%,
+          rgba(255,255,255,.95),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 90% 80%,
+          rgba(111,224,168,.35),
+          transparent 35%
+        ),
+        linear-gradient(
+          145deg,
+          #bff5d9 0%,
+          #d9fae9 45%,
+          #effff6 100%
+        );
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      padding: 24px 14px;
+
+      overflow-x: hidden;
+    }
+
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(3px);
+      opacity: .38;
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .orb1 {
+      width: 140px;
+      height: 140px;
+      background: #8be8b9;
+      left: -70px;
+      top: 12%;
+    }
+
+    .orb2 {
+      width: 180px;
+      height: 180px;
+      background: #b4f3d0;
+      right: -90px;
+      bottom: 5%;
+      animation-delay: 1.5s;
+    }
+
+    @keyframes float {
+      0%,100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-16px);
+      }
+    }
+
+    .payment-card {
+      position: relative;
+      z-index: 5;
+
+      width: 100%;
+      max-width: 510px;
+
+      overflow: hidden;
+
+      border-radius: 34px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.92),
+          rgba(244,255,249,.86)
+        );
+
+      border: 1px solid rgba(255,255,255,.95);
+
+      box-shadow:
+        0 30px 80px rgba(25,112,76,.18),
+        0 8px 25px rgba(25,112,76,.08),
+        inset 0 1px 0 rgba(255,255,255,1);
+
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+
+      animation: cardIn .7s ease-out;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .header {
+      text-align: center;
+      padding: 36px 22px 29px;
+    }
+
+    .logo {
+      width: 66px;
+      height: 66px;
+
+      margin: 0 auto 12px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 19px;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          145deg,
+          #22c27d,
+          #06925b
+        );
+
+      box-shadow:
+        0 14px 27px rgba(0,145,88,.24),
+        inset 0 2px 2px rgba(255,255,255,.35),
+        inset 0 -6px 10px rgba(0,0,0,.10);
+
+      transform:
+        perspective(600px)
+        rotateX(3deg);
+    }
+
+    .logo-arrow {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1;
+      transform: translateX(1px);
+    }
+
+    .brand {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #159564;
+      margin-bottom: 6px;
+    }
+
+    .title {
+      font-size: 28px;
+      line-height: 1.15;
+      font-weight: 950;
+      letter-spacing: -1px;
+      color: #0b3024;
+    }
+
+    .subtitle {
+      margin-top: 13px;
+
+      font-size: 15px;
+      font-weight: 500;
+
+      color: #617d72;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lock {
+      color: #14a66c;
+      font-size: 18px;
+    }
+
+    .divider {
+      height: 1px;
+      background: #d6eee2;
+    }
+
+    .amount-section {
+      text-align: center;
+      padding: 34px 20px 20px;
+    }
+
+    .amount-label {
+      font-size: 14px;
+      letter-spacing: 2px;
+      font-weight: 750;
+      color: #718c82;
+    }
+
+    .amount {
+      margin-top: 6px;
+
+      font-size: 58px;
+      line-height: 1;
+
+      font-weight: 950;
+      letter-spacing: -3px;
+
+      color: #063d2b;
+    }
+
+    /* IMAGE / QR AREA */
+
+    .qr-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      padding: 4px 20px 18px;
+    }
+
+    .qr-frame {
+      position: relative;
+
+      width: min(78vw, 390px);
+      aspect-ratio: 1 / 1;
+
+      padding: 14px;
+
+      border-radius: 29px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #08a867,
+          #0b9a61 50%,
+          #087d50
+        );
+
+      box-shadow:
+        0 20px 35px rgba(0,125,80,.23),
+        0 5px 10px rgba(0,125,80,.12),
+        inset 0 2px 2px rgba(255,255,255,.30),
+        inset 0 -5px 10px rgba(0,0,0,.08);
+
+      transform:
+        perspective(900px)
+        rotateX(1deg);
+    }
+
+    .qr-frame::before {
+      content: "";
+
+      position: absolute;
+      inset: 7px;
+
+      border: 2px solid rgba(255,255,255,.34);
+
+      border-radius: 24px;
+
+      pointer-events: none;
+    }
+
+    .qr-white {
+      width: 100%;
+      height: 100%;
+
+      padding: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 23px;
+
+      background: white;
+
+      box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.05),
+        0 3px 8px rgba(0,70,40,.12);
+
+      overflow: hidden;
+    }
+
+    /* YOUR IMAGE */
+
+    .qr-image {
+      width: 100%;
+      height: 100%;
+
+      display: block;
+
+      object-fit: cover;
+
+      border-radius: 18px;
+    }
+
+    .corner {
+      position: absolute;
+
+      width: 30px;
+      height: 30px;
+
+      border-color: #073e2c;
+      border-style: solid;
+
+      z-index: 4;
+
+      pointer-events: none;
+    }
+
+    .c1 {
+      top: 10px;
+      left: 10px;
+      border-width: 5px 0 0 5px;
+      border-radius: 12px 0 0 0;
+    }
+
+    .c2 {
+      top: 10px;
+      right: 10px;
+      border-width: 5px 5px 0 0;
+      border-radius: 0 12px 0 0;
+    }
+
+    .c3 {
+      bottom: 10px;
+      left: 10px;
+      border-width: 0 0 5px 5px;
+      border-radius: 0 0 0 12px;
+    }
+
+    .c4 {
+      bottom: 10px;
+      right: 10px;
+      border-width: 0 5px 5px 0;
+      border-radius: 0 0 12px 0;
+    }
+
+    .scan-text {
+      margin-top: 17px;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      color: #67867a;
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scan-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: #16b979;
+
+      box-shadow:
+        0 0 0 5px rgba(22,185,121,.10);
+    }
+
+    .upi-box {
+      margin: 9px 30px 20px;
+
+      padding: 15px 18px;
+
+      border-radius: 18px;
+
+      border: 1px solid #d3ebe0;
+
+      background:
+        linear-gradient(
+          145deg,
+          #fafffc,
+          #f1fcf6
+        );
+
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.95),
+        0 5px 14px rgba(24,113,77,.045);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 10px;
+    }
+
+    .upi-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #7b948b;
+      margin-bottom: 4px;
+    }
+
+    .upi-id {
+      font-size: 15px;
+      font-weight: 750;
+      color: #214f3d;
+      word-break: break-all;
+    }
+
+    .ready {
+      flex-shrink: 0;
+
+      padding: 7px 11px;
+
+      border-radius: 20px;
+
+      background: #e0f8ea;
+
+      color: #138258;
+
+      font-size: 12px;
+      font-weight: 850;
+
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pay-wrap {
+      padding: 0 30px;
+    }
+
+    .pay-button {
+      width: 100%;
+      min-height: 64px;
+
+      border: 0;
+      outline: none;
+
+      border-radius: 19px;
+
+      cursor: pointer;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+
+      color: white;
+
+      background:
+        linear-gradient(
+          145deg,
+          #1ac47d 0%,
+          #0eaa69 50%,
+          #078d58 100%
+        );
+
+      box-shadow:
+        0 6px 0 #067447,
+        0 15px 28px rgba(7,141,88,.22),
+        inset 0 2px 2px rgba(255,255,255,.28);
+
+      font-size: 20px;
+      font-weight: 900;
+
+      transition:
+        transform .12s ease,
+        box-shadow .12s ease,
+        opacity .2s ease;
+
+      touch-action: manipulation;
+    }
+
+    .pay-button .pay-icon {
+      font-size: 22px;
+    }
+
+    .pay-button:active {
+      transform: translateY(5px);
+
+      box-shadow:
+        0 2px 0 #067447,
+        0 8px 15px rgba(7,141,88,.18);
+    }
+
+    .pay-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 3px 0 #71857d;
+    }
+
+    .timer {
+      text-align: center;
+
+      padding: 22px 20px 0;
+
+      color: #658178;
+
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .timer-icon {
+      color: #18a875;
+      font-size: 19px;
+      margin-right: 5px;
+    }
+
+    #timer {
+      color: #087f52;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .footer {
+      text-align: center;
+
+      padding: 22px 30px 30px;
+
+      color: #819a91;
+
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .footer-icon {
+      color: #159c67;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .expired {
+      display: none;
+
+      margin-top: 8px;
+
+      color: #bd5145;
+
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+
+      body {
+        padding: 16px 10px;
+      }
+
+      .payment-card {
+        border-radius: 30px;
+      }
+
+      .header {
+        padding: 28px 17px 24px;
+      }
+
+      .logo {
+        width: 62px;
+        height: 62px;
+      }
+
+      .title {
+        font-size: 25px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .amount-section {
+        padding-top: 29px;
+      }
+
+      .amount {
+        font-size: 53px;
+      }
+
+      .qr-frame {
+        width: min(82vw, 370px);
+        padding: 13px;
+        border-radius: 27px;
+      }
+
+      .qr-white {
+        border-radius: 21px;
+      }
+
+      .qr-image {
+        border-radius: 17px;
+      }
+
+      .upi-box {
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
+      .pay-wrap {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .pay-button {
+        min-height: 61px;
+        font-size: 18px;
+      }
+
+      .footer {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+
+    @media (max-width: 360px) {
+
+      body {
+        padding: 10px 8px;
+      }
+
+      .header {
+        padding-top: 24px;
+      }
+
+      .logo {
+        width: 57px;
+        height: 57px;
+      }
+
+      .brand {
+        font-size: 12px;
+      }
+
+      .title {
+        font-size: 22px;
+      }
+
+      .subtitle {
+        font-size: 12px;
+      }
+
+      .amount {
+        font-size: 47px;
+      }
+
+      .qr-frame {
+        width: 82vw;
+        padding: 11px;
+      }
+
+      .upi-box {
+        margin-left: 15px;
+        margin-right: 15px;
+      }
+
+      .pay-wrap {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+
+  <main class="payment-card">
+
+    <header class="header">
+
+      <div class="logo">
+        <div class="logo-arrow">↦</div>
+      </div>
+
+      <div class="brand">
+        EARNZEXBOT
+      </div>
+
+      <h1 class="title">
+        Secure UPI Payment
+      </h1>
+
+      <div class="subtitle">
+        <span class="lock">♧</span>
+        <span>Pay safely through your UPI app</span>
+      </div>
+
+    </header>
+
+    <div class="divider"></div>
+
+    <section class="amount-section">
+
+      <div class="amount-label">
+        AMOUNT TO PAY
+      </div>
+
+      <div class="amount">
+        ₹99
+      </div>
+
+    </section>
+
+    <!-- QR / IMAGE AREA -->
+
+    <section class="qr-area">
+
+      <div class="qr-frame">
+
+        <div class="corner c1"></div>
+        <div class="corner c2"></div>
+        <div class="corner c3"></div>
+        <div class="corner c4"></div>
+
+        <div class="qr-white">
+
+          <img
+            class="qr-image"
+            src="https://i.ibb.co/qLJXfbkT/6210988486794351339-121.jpg"
+            alt="UPI Payment QR"
+          >
+
+        </div>
+
+      </div>
+
+      <div class="scan-text">
+        <span class="scan-dot"></span>
+        Scan with any UPI app to pay
+      </div>
+
+    </section>
+
+    <!-- UPI ID -->
+
+    <section class="upi-box">
+
+      <div>
+
+        <div class="upi-label">
+          UPI ID
+        </div>
+
+        <div class="upi-id">
+          earnzexbot@nyes
+        </div>
+
+      </div>
+
+      <div class="ready">
+        ✓ Ready
+      </div>
+
+    </section>
+
+    <!-- PAY BUTTON -->
+
+    <div class="pay-wrap">
+
+      <button
+        class="pay-button"
+        id="payButton"
+        type="button"
+      >
+        <span class="pay-icon">▣</span>
+        <span>Pay with App</span>
+      </button>
+
+    </div>
+
+    <!-- TIMER -->
+
+    <div class="timer">
+
+      <span class="timer-icon">◷</span>
+
+      Complete payment within
+
+      <span id="timer">
+        30:00
+      </span>
+
+    </div>
+
+    <div
+      class="expired"
+      id="expired"
+    >
+      Payment session expired. Please refresh the page.
+    </div>
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+      <div class="footer-icon">
+        ♢
+      </div>
+
+      You will complete payment securely
+      in your chosen UPI app.
+
+    </footer>
+
+  </main>
+
+
+  <script>
+
+    /* ================================
+       PAYMENT CONFIG
+    ================================= */
+
+    const UPI_ID = "earnzexbot@nyes";
+    const AMOUNT = "99";
+    const PAYMENT_NAME = "EARNZEXBOT";
+
+
+    /* ================================
+       UPI PAYMENT URL
+    ================================= */
+
+    const upiUrl =
+      "upi://pay" +
+      "?pa=" + encodeURIComponent(UPI_ID) +
+      "&pn=" + encodeURIComponent(PAYMENT_NAME) +
+      "&am=" + encodeURIComponent(AMOUNT) +
+      "&cu=INR";
+
+
+    /* ================================
+       30 MINUTE TIMER
+    ================================= */
+
+    const TIMER_SECONDS = 30 * 60;
+
+    const STORAGE_KEY =
+      "earnzexbot_payment_expiry";
+
+
+    let expiry =
+      localStorage.getItem(STORAGE_KEY);
+
+
+    if (!expiry) {
+
+      expiry =
+        Date.now() +
+        TIMER_SECONDS * 1000;
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        expiry
+      );
+
+    }
+
+
+    const timerElement =
+      document.getElementById("timer");
+
+    const payButton =
+      document.getElementById("payButton");
+
+    const expiredElement =
+      document.getElementById("expired");
+
+
+    function updateTimer() {
+
+      const remaining =
+        Math.max(
+          0,
+          Math.floor(
+            (
+              Number(expiry) -
+              Date.now()
+            ) / 1000
+          )
+        );
+
+
+      if (remaining <= 0) {
+
+        timerElement.textContent =
+          "00:00";
+
+        payButton.disabled = true;
+
+        expiredElement.style.display =
+          "block";
+
+        return false;
+      }
+
+
+      const minutes =
+        Math.floor(
+          remaining / 60
+        );
+
+      const seconds =
+        remaining % 60;
+
+
+      timerElement.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+
+      return true;
+    }
+
+
+    updateTimer();
+
+
+    const timerInterval =
+      setInterval(
+        function () {
+
+          if (!updateTimer()) {
+            clearInterval(timerInterval);
+          }
+
+        },
+        1000
+      );
+
+
+    /* ================================
+       PAY WITH APP
+    ================================= */
+
+    payButton.addEventListener(
+      "click",
+      function () {
+
+        if (!updateTimer()) {
+
+          alert(
+            "Payment session expired."
+          );
+
+          return;
+        }
+
+
+        window.location.href =
+          upiUrl;
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
